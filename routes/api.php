@@ -37,4 +37,6 @@ Route::group([
 Route::get('allUser', [ApiControlle::class, 'all_user'])->name('allUser')->middleware('jwt.verify');
 Route::post('create_user', [ApiControlle::class, 'create_user'])->name('create_user')->middleware('jwt.verify');
 
-
+Route::post('user_create', [AuthApiController::class, 'user_create'])->name('user_create');
+Route::post('user_login', [AuthApiController::class, 'user_login'])->name('user_login');
+Route::get('user_all', [AuthApiController::class, 'user_all'])->name('user_all');

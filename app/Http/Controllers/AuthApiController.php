@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AuthApiController extends Controller
 {
@@ -14,8 +16,64 @@ class AuthApiController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'user_create', 'user_login', 'user_all']]);
         
+    }
+
+    public function user_all(Request $request) {
+        $user = User::all();
+        return response()->json($user, 200);
+    }
+    
+    public function user_create(Request $request) {
+        $validate = Validator::make($request->all(), [
+            "name"=> "required",
+            "password"=> "required"
+        ]);
+
+        if($validate->fails()) {
+            response()->json([
+                "status"=> false,
+                "message"=> "Validation Error",
+                "error"=> $validate->errors()
+            ], 401);
+        }
+
+        $user = User::create([
+            "name"=> $request->name,
+            "password"=> $request->password
+        ]);
+
+        return response()->json([
+            "status"=> true,
+            "message"=> "User created",
+        ], 200);
+    }
+
+    public function user_login(Request $request) {
+        $validator = Validator::make($request->all(), [
+            "name"=> "required",
+            "password"=> "required"
+        ]);
+
+        // $credentials = $request->only("name", "password");
+
+        $auth = Auth::attempt([
+            "name"=> $request->name,
+            "password"=> $request->password,
+        ]);
+
+        if($auth) {
+            return response()->json([
+                "status"=> true,
+                "message"=> "successfully login"
+            ], 200);
+        }
+
+        return response()->json([
+            "status"=> false,
+            "message"=> "login fail"
+        ], 401);
     }
 
     /**
